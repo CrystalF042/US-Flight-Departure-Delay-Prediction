@@ -1,0 +1,38 @@
+{
+  "test_period": "Nov\u2013Dec 2024",
+  "test_n_rows": 1134185,
+  "test_delay_rate": 0.17345671120672554,
+  "threshold": 0.16,
+  "metrics": {
+    "ROC-AUC": 0.6643592886099324,
+    "PR-AUC": 0.29165824386319217,
+    "Brier": 0.13748942577093723,
+    "Accuracy": 0.6962559018149597,
+    "Precision": 0.2806434182634357,
+    "Recall": 0.48049122664335236,
+    "F1": 0.35433073817654315
+  },
+  "confusion_matrix": {
+    "true_negatives": 695155,
+    "false_positives": 242298,
+    "false_negatives": 102204,
+    "true_positives": 94528
+  },
+  "cv_vs_test": {
+    "CV (LightGBM, mean across 3 folds)": {
+      "ROC-AUC": 0.7101,
+      "PR-AUC": 0.4367,
+      "Brier": 0.1682
+    },
+    "Test (Nov\u2013Dec 2024)": {
+      "ROC-AUC": 0.6644,
+      "PR-AUC": 0.2917,
+      "Brier": 0.1375
+    },
+    "Difference": {
+      "ROC-AUC": -0.0457,
+      "PR-AUC": -0.145,
+      "Brier": -0.0307
+    }
+  }
+}
