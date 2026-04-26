@@ -173,6 +173,7 @@ SHAP values computed on 10,000 test flights. Feature importance ranked by mean |
 *Figure 4: Global feature importance (mean |SHAP|). 6 of the top 15 features are weather variables.*
 
 <img width="500" alt="Image" src="https://github.com/user-attachments/assets/d3b38325-f333-41ce-a569-3fd49dfe227b" />
+
 *Figure 5: SHAP beeswarm plot. Red = high feature value, blue = low. Evening departure hours push strongly toward delay; high precipitation does the same.*
 
 `origin_avg_dep_delay` — the top historical baseline before weather integration — dropped to rank 22, displaced by daily weather signals. The engineered `origin_bad_weather` flag (rank 15) was outperformed by raw `origin_prcp` (rank 3), confirming that tree models extract better thresholds from continuous features than from hand-crafted binary flags.
