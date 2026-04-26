@@ -12,14 +12,12 @@ import json
 import sys
 from pathlib import Path
 
-# Add model folder to path so we can import feature_computation
+
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT / "models"))
 from feature_computation import compute_features, PREDICTOR_COLS, CATEGORICAL_COLS
 
-# ==========================================================================
-# Load all artifacts once at app startup
-# ==========================================================================
+
 MODELS_DIR = ROOT / "models"
 
 with open(MODELS_DIR / "classifier.pkl", "rb") as f:
@@ -62,11 +60,7 @@ def estimate_distance(origin, dest):
     return int(km * 0.621371)
 
 
-# ==========================================================================
-# UI
-# ==========================================================================
 app_ui = ui.page_fluid(
-    
     ui.panel_title("✈️ Flight Delay Predictor"),
     ui.markdown(
         "Enter flight details to predict the probability of a departure delay "
@@ -100,6 +94,10 @@ app_ui = ui.page_fluid(
         ),
         ui.card(
             ui.h3("Flight context"),
+            ui.markdown(
+                "_Weather shown is **historical typical** for this calendar day, "
+                "based on NOAA 2024 observations — not a real-time forecast._"
+            ),
             ui.output_ui("flight_context"),
         ),
     ),
@@ -110,13 +108,29 @@ app_ui = ui.page_fluid(
         f"Decision threshold: {THRESHOLD:.2f}. "
         f"Trained on Jan–Aug 2024 BTS data with NOAA weather."
     ),
+    ui.markdown(
+        """
+        ---
+        ### About this app
+        
+        This is a **research demo**, not a production forecasting service.
+        Weather inputs come from a static lookup of NOAA 2024 daily observations,
+        averaged by airport and calendar day. The app answers questions like
+        *"What is the typical delay risk for a JFK→LAX flight on a mid-June afternoon?"*
+        rather than *"What is the delay probability for my flight tomorrow?"*
+        
+        The model architecture supports real-time deployment without retraining —
+        replacing the static weather lookup with a forecast API call (OpenWeatherMap,
+        Tomorrow.io, NOAA NDFD) is sufficient. The static lookup is used here for
+        offline reproducibility and to keep the demo dependency-free.
+        """
+    ),
     theme=shinyswatch.theme.cosmo,
 )
 
 
-# ==========================================================================
 # Server
-# ==========================================================================
+
 def server(input, output, session):
 
     @reactive.Calc
