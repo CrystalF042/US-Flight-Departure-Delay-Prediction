@@ -274,6 +274,6 @@ https://github.com/CrystalF042/applied-statistics
 
 - Sternberg et al. (2021). A Review on Flight Delay Prediction. *arXiv:1703.06118*.
 - Rebollo & Balakrishnan (2014). Characterization and prediction of air traffic delays. *Transp. Res. Part C*, 44, 231–241.
-- Alfarhood et al. (2024). Flight delay prediction using CatBoost. *Applied Sciences*.
-- Hatıpoğlu & Tosun (2024). Flight delay prediction with ML models. *J. Air Transp. Mgmt.*
-- Lundberg & Lee (2017). A unified approach to interpreting model predictions. *NeurIPS*.
+- Alfarhood, M., Alotaibi, R., Abdulrahim, B., Einieh, A., Almousa, M., & Alkhanifer, A. (2024). Predicting flight delays with machine learning: *A case study from Saudi Arabian Airlines. International Journal of Aerospace Engineering*, 2024, Article 3385463. https://doi.org/10.1155/2024/3385463
+- Hatıpoğlu, I., Tosun, Ö., & Tosun, N. (2022). Flight delay prediction based with machine learning. *LogForum*, 18, 97–107. https://doi.org/10.17270/J.LOG.2022.655
+- Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. In I. Guyon et al. (Eds.), *Advances in Neural Information Processing Systems 30* (pp. 4765–4774). Curran Associates, Inc.
