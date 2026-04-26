@@ -111,12 +111,12 @@ Regularization-related parameters dominated importance across all three models, 
 
 **Isotonic regression** on the validation set maps raw LightGBM scores to calibrated probabilities (Brier: 0.1097 → 0.1086).
 
-<!-- INSERT IMAGE: calibration_reliability.png -->
+<img width="2082" height="768" alt="Image" src="https://github.com/user-attachments/assets/b9fdbafe-bb58-4ea6-8825-f5ab792e43a8" />
 *Figure 1: Reliability diagram. Before calibration (left), predictions under-estimate delay probability. After isotonic regression (right), predictions align with actual delay rates.*
 
 The F1-optimal threshold of **0.160** was identified via grid search on the validation set, yielding ~51% recall at ~22% precision. The Shiny app shows calibrated probability directly with color-coded risk levels (🟢 low < 15%, 🟡 moderate 15–30%, 🔴 high > 30%) rather than a binary decision.
 
-<!-- INSERT IMAGE: threshold_tradeoff.png -->
+<img width="1482" height="881" alt="Image" src="https://github.com/user-attachments/assets/dc5bfdc2-8691-4fd5-a6e8-cc083321cab0" />
 *Figure 2: Precision–recall–F1 tradeoff across thresholds. Optimal F1 at threshold 0.160.*
 
 ---
@@ -131,8 +131,6 @@ The F1-optimal threshold of **0.160** was identified via grid search on the vali
 | **LightGBM** | **0.7101 ± 0.008** | **0.4367 ± 0.018** | **0.1682 ± 0.011** |
 | CatBoost | 0.7085 ± 0.010 | 0.4361 ± 0.024 | 0.1685 ± 0.009 |
 
-<!-- INSERT IMAGE: model_comparison.png -->
-*Figure 3: CV performance comparison with ± 1 std error bars.*
 
 LightGBM selected as final model — equivalent performance to CatBoost at ~2.5× faster training.
 
@@ -146,8 +144,8 @@ LightGBM selected as final model — equivalent performance to CatBoost at ~2.5�
 | Recall | 0.480 |
 | F1 | 0.354 |
 
-<!-- INSERT IMAGE: confusion_matrix_test.png -->
-*Figure 4: Confusion matrix at threshold 0.160. 94,528 true positives / 242,298 false positives / 102,204 false negatives / 695,155 true negatives.*
+<img width="1034" height="878" alt="Image" src="https://github.com/user-attachments/assets/1f700c25-f36c-48b6-a27d-8ab20cedc2aa" />
+*Figure 3: Confusion matrix at threshold 0.160. 94,528 true positives / 242,298 false positives / 102,204 false negatives / 695,155 true negatives.*
 
 The CV-to-test gap (0.710 → 0.664) reflects seasonal distribution shift: training on Jan–Aug misses winter weather and holiday patterns present in the Nov–Dec test period. The test ROC-AUC is consistent with the literature ceiling for pre-departure prediction (Sternberg et al., 2021).
 
@@ -168,10 +166,10 @@ SHAP values computed on 10,000 test flights. Feature importance ranked by mean |
 | 7 | origin_pres | 0.080 |
 
 <!-- INSERT IMAGE: shap_importance_bar_v2.png -->
-*Figure 5: Global feature importance (mean |SHAP|). 6 of the top 15 features are weather variables.*
+*Figure 4: Global feature importance (mean |SHAP|). 6 of the top 15 features are weather variables.*
 
 <!-- INSERT IMAGE: shap_summary_v2.png -->
-*Figure 6: SHAP beeswarm plot. Red = high feature value, blue = low. Evening departure hours push strongly toward delay; high precipitation does the same.*
+*Figure 5: SHAP beeswarm plot. Red = high feature value, blue = low. Evening departure hours push strongly toward delay; high precipitation does the same.*
 
 `origin_avg_dep_delay` — the top historical baseline before weather integration — dropped to rank 22, displaced by daily weather signals. The engineered `origin_bad_weather` flag (rank 15) was outperformed by raw `origin_prcp` (rank 3), confirming that tree models extract better thresholds from continuous features than from hand-crafted binary flags.
 
