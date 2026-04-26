@@ -1,4 +1,4 @@
-# US Flight Departure Delay Prediction
+# US Flight Delay Risk Prediction
 
 A calibrated LightGBM classifier for flight delay prediction on US domestic flights, built from ~6.97M BTS records (2024) augmented with NOAA daily weather observations. The model is trained on the Jan–Aug split and evaluated on held-out Sep–Dec data. Deployed as an interactive Shiny for Python application with SHAP-based per-flight explanations.
 
@@ -10,7 +10,7 @@ A calibrated LightGBM classifier for flight delay prediction on US domestic flig
 
 1. **Weather integration is the most impactful feature addition.** NOAA daily observations pushed origin precipitation to SHAP rank 3 globally, with 6 of the top 15 features being weather variables. The model learned a nonlinear rain threshold (~5mm) and a rain × departure-hour interaction reflecting delay propagation.
 
-2. **LightGBM and CatBoost performed identically** (CV ROC-AUC: 0.710 vs 0.709), both outperforming Logistic Regression by ~2.3pp. Weather features introduced threshold effects that only tree-based models could exploit.
+2. **LightGBM and CatBoost performed identically** (CV ROC-AUC: 0.710 vs 0.709), both outperforming Logistic Regression by ~2.3pp. Weather features introduced threshold effects that tree-based models could exploit.
 
 3. **Scheduled departure hour dominates all features** (~3× the SHAP importance of the next predictor), reflecting delay compounding through daily aircraft rotations.
 
@@ -217,7 +217,7 @@ The seasonal generalization gap (CV 0.710 → test 0.664) would narrow with full
 
 The deployed Shiny app uses a static **2024 historical weather reference table** — the observed weather at each airport on each calendar day during 2024 (NOAA daily observations).
 
-- ✅ **Suitable for:** *"What is the typical delay risk for a flight from JFK in mid-June?"* — the app answers reliably because it uses representative weather conditions.
+- ✅ **Suitable for:** *"What is the typical delay risk for a flight from JFK in mid-June?"* — the app provides a reasonable scenario-based estimate because it uses historical weather conditions from the 2024 reference table.
 - ❌ **Not suitable for:** *"What is the delay probability for my flight tomorrow?"* — tomorrow's actual weather may differ significantly from the historical reference.
 
 This was a deliberate design choice for a portfolio project: the demo runs anywhere without external API keys or rate limits, maintains independence from third-party services, and keeps the focus on the modeling pipeline (calibrated probabilities, leakage-safe baselines, SHAP explanations) rather than weather data plumbing.
