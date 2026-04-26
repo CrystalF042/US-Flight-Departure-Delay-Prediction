@@ -1,6 +1,6 @@
 # US Flight Departure Delay Prediction
 
-A calibrated LightGBM classifier for pre-departure flight delay prediction on US domestic flights, trained on ~6.97M BTS records (2024) augmented with NOAA daily weather observations. Deployed as an interactive Shiny for Python application with SHAP-based per-flight explanations.
+A calibrated LightGBM classifier for flight delay prediction on US domestic flights, built from ~6.97M BTS records (2024) augmented with NOAA daily weather observations. The model is trained on the Jan–Aug split and evaluated on held-out Sep–Dec data. Deployed as an interactive Shiny for Python application with SHAP-based per-flight explanations.
 
 **🔗 [Live Demo: Flight Delay Predictor](https://crystalguo.shinyapps.io/flight-delay-predictor/)**
 
@@ -14,17 +14,17 @@ A calibrated LightGBM classifier for pre-departure flight delay prediction on US
 
 3. **Scheduled departure hour dominates all features** (~3× the SHAP importance of the next predictor), reflecting delay compounding through daily aircraft rotations.
 
-4. **Isotonic regression calibration** ensures predicted probabilities match actual delay rates — a "24% chance" means exactly that.
+4. **Isotonic regression calibration** improves probability alignment — after calibration, predicted probabilities are well-aligned with observed delay rates on the validation set, so a predicted 24% delay risk can be interpreted as approximately a 24% empirical delay rate for similar flights.
 
-5. **The Shiny app** provides calibrated probability, color-coded risk level, and SHAP-based top contributing factors for any user-specified flight.
+5. **The Shiny app** provides calibrated probability, color-coded risk level, and SHAP-based top contributing factors for any user-specified flight scenario.
 
 ---
 
 ## 1. Introduction
 
-This project predicts whether a US domestic flight departure will be delayed >15 minutes (FAA definition) using only pre-departure information. Following Sternberg et al. (2021), it addresses the root delay problem at ensemble scope using ML methods. The literature identifies a performance ceiling of ROC-AUC 0.65–0.70 without real-time congestion data (Sternberg et al., 2021; Rebollo & Balakrishnan, 2014); this project tests whether daily weather observations can push past that ceiling.
+This project predicts whether a US domestic flight departure will be delayed >15 minutes (FAA definition). Following Sternberg et al. (2021), it addresses the root delay problem at ensemble scope using ML methods. The literature identifies a performance ceiling of ROC-AUC 0.65–0.70 without real-time congestion data (Sternberg et al., 2021; Rebollo & Balakrishnan, 2014); this project tests whether daily weather observations can push past that ceiling.
 
-All features respect a strict **pre-departure prediction scenario**: operational outcomes (actual departure time, taxi-out, air time, arrival delay) are excluded. Historical baselines are computed using only past flights relative to each observation — never future data.
+All features exclude operational outcomes (actual departure time, taxi-out, air time, arrival delay). Historical baselines are computed using only past flights relative to each observation — never future data. The model uses same-day NOAA daily weather observations as a **weather-risk proxy** in the offline modeling setting. In a production pre-departure system, these features should be replaced with forecast or hourly aviation weather data available before departure (e.g., METAR/TAF).
 
 ---
 
@@ -53,14 +53,16 @@ The 2024 window avoids COVID-era distortions (2020–2021) while capturing curre
 | Join keys | Origin + destination airport × flight date |
 | Missing values | prcp/snow → 0; temperature/wind → airport monthly mean |
 
+> **Note on weather features:** NOAA daily observations (e.g., total daily precipitation, daily average temperature) summarize the entire day and are not strictly available before departure. In this offline modeling setting, they serve as a weather-risk proxy. For real-time deployment, these should be replaced with pre-departure forecast data — see [Extending to Real-Time](#extending-to-real-time).
+
 ### Feature Summary (30 predictors)
 
 | Category | Features |
 |---|---|
 | Temporal | month, day of week, departure hour, is_weekend, is_peak_hour, season |
-| Carrier | carrier ID, carrier historical avg delay |
-| Airport | origin/dest IDs, origin historical avg delay |
-| Route | route ID, route avg delay, distance, elapsed time, distance bucket |
+| Carrier | carrier ID, carrier historical avg departure delay |
+| Airport | origin/dest IDs, origin historical avg departure delay |
+| Route | route ID, route avg departure delay, distance, elapsed time, distance bucket |
 | Weather | 7 variables × 2 airports + engineered flags |
 
 ### Data Splits
@@ -113,7 +115,7 @@ Regularization-related parameters dominated importance across all three models, 
 
 <img width="700" alt="Image" src="https://github.com/user-attachments/assets/b9fdbafe-bb58-4ea6-8825-f5ab792e43a8" />
 
-*Figure 1: Reliability diagram. Before calibration (left), predictions under-estimate delay probability. After isotonic regression (right), predictions align with actual delay rates.*
+*Figure 1: Reliability diagram. Before calibration (left), predictions under-estimate delay probability. After isotonic regression (right), predictions are better aligned with actual delay rates on the validation set.*
 
 The F1-optimal threshold of **0.160** was identified via grid search on the validation set, yielding ~51% recall at ~22% precision. The Shiny app shows calibrated probability directly with color-coded risk levels (🟢 low < 15%, 🟡 moderate 15–30%, 🔴 high > 30%) rather than a binary decision.
 
@@ -133,7 +135,6 @@ The F1-optimal threshold of **0.160** was identified via grid search on the vali
 | **LightGBM** | **0.7101 ± 0.008** | **0.4367 ± 0.018** | **0.1682 ± 0.011** |
 | CatBoost | 0.7085 ± 0.010 | 0.4361 ± 0.024 | 0.1685 ± 0.009 |
 
-
 LightGBM selected as final model — equivalent performance to CatBoost at ~2.5× faster training.
 
 ### 4.2 Test Set (Nov–Dec 2024)
@@ -150,7 +151,7 @@ LightGBM selected as final model — equivalent performance to CatBoost at ~2.5�
 
 *Figure 3: Confusion matrix at threshold 0.160. 94,528 true positives / 242,298 false positives / 102,204 false negatives / 695,155 true negatives.*
 
-The CV-to-test gap (0.710 → 0.664) reflects seasonal distribution shift: training on Jan–Aug misses winter weather and holiday patterns present in the Nov–Dec test period. The test ROC-AUC is consistent with the literature ceiling for pre-departure prediction (Sternberg et al., 2021).
+The CV-to-test gap (0.710 → 0.664) reflects seasonal distribution shift: the training period does not fully capture the distribution of November–December operations, including holiday travel patterns and late-year winter weather conditions. The test ROC-AUC is consistent with the literature ceiling for pre-departure prediction (Sternberg et al., 2021).
 
 ---
 
@@ -188,21 +189,21 @@ SHAP values computed on 10,000 test flights. Feature importance ranked by mean |
 
 **🔗 [Live Demo](https://crystalguo.shinyapps.io/flight-delay-predictor/)**
 
-The Shiny for Python application translates the trained model into an interactive tool where users can assess delay risk for any upcoming flight. The app loads the serialized LightGBM classifier, isotonic calibrator, baseline lookups, and weather reference data from the `models/shiny_bundle/` directory.
+The Shiny for Python application translates the trained model into an interactive prototype where users can explore typical delay risk for user-specified flight scenarios. The app loads the serialized LightGBM classifier, isotonic calibrator, baseline lookups, and weather reference data from the `models/shiny_bundle/` directory.
 
 **Inputs:** origin airport, destination airport, carrier, scheduled departure date and time.
 
 **Outputs:**
 - Calibrated delay probability displayed as a percentage with a color-coded risk gauge (🟢 < 15% / 🟡 15–30% / 🔴 > 30%)
-- Top contributing factors derived from SHAP values for that specific flight (e.g., "Evening departure +8%, Rain at origin +6%, Carrier track record +3%")
-- Historical context showing the airport's and carrier's baseline delay rates for comparison
+- Top contributing factors derived from SHAP values, showing whether each factor pushes the prediction toward delay or toward on-time departure (e.g., evening departure increases delay risk, rain at origin increases delay risk, carrier history also contributes positively)
+- Historical context showing the airport's and carrier's historical average departure delay for comparison
 
 A ROC-AUC of 0.664 is a modest number in isolation. But the app demonstrates something more important: the complete pipeline from raw government data to actionable, transparent user-facing predictions. When a user sees:
 
 > *"Your 6 PM American Airlines flight from JFK has a **31% delay probability**.
-> Top contributors: Evening departure (+8%), rain at origin (+6%), carrier's historical track record (+4%)."*
+> Top contributors: evening departure pushes the prediction toward delay, rain at origin increases delay risk, and carrier history also contributes."*
 
-...they receive genuinely useful information. They understand *why* the model thinks their flight is at risk, they can judge whether the reasoning makes sense (is it actually raining at JFK today?), and they can act on it.
+...they receive genuinely useful information. They understand *why* the model flags their flight as higher risk, they can judge whether the reasoning makes sense, and they can act on it.
 
 ---
 
@@ -210,14 +211,14 @@ A ROC-AUC of 0.664 is a modest number in isolation. But the app demonstrates som
 
 ### Model Limitations
 
-The seasonal generalization gap (CV 0.710 → test 0.664) would narrow with full-year training data. Real-time congestion features (FAA OPSNET, rolling airport delay averages) would address the dominant missing predictor identified in the literature. The near-identical LightGBM/CatBoost performance suggests the current feature set is near its information ceiling; further gains require richer data, not more complex models. Future extensions include hourly METAR weather, congestion proxies, multi-year training (2022–2024), and a Stage 2 regression model for delay magnitude estimation.
+The seasonal generalization gap (CV 0.710 → test 0.664) would narrow with full-year training data. The training period does not fully capture the distribution of November–December operations, including holiday travel patterns and late-year winter weather conditions. Real-time congestion features (FAA OPSNET, rolling airport delay averages) would address the dominant missing predictor identified in the literature. The near-identical LightGBM/CatBoost performance suggests the current feature set is near its information ceiling; further gains require richer data, not more complex models. Future extensions include hourly METAR weather, congestion proxies, multi-year training (2022–2024), and a Stage 2 regression model for delay magnitude estimation.
 
 ### Weather Data: Historical, Not Real-Time
 
-The deployed Shiny app uses a static lookup of **historical climatology** — the typical weather observed at each airport on each calendar day during 2024 (NOAA daily observations).
+The deployed Shiny app uses a static **2024 historical weather reference table** — the observed weather at each airport on each calendar day during 2024 (NOAA daily observations).
 
 - ✅ **Suitable for:** *"What is the typical delay risk for a flight from JFK in mid-June?"* — the app answers reliably because it uses representative weather conditions.
-- ❌ **Not suitable for:** *"What is the delay probability for my flight tomorrow?"* — tomorrow's actual weather may differ significantly from the historical average.
+- ❌ **Not suitable for:** *"What is the delay probability for my flight tomorrow?"* — tomorrow's actual weather may differ significantly from the historical reference.
 
 This was a deliberate design choice for a portfolio project: the demo runs anywhere without external API keys or rate limits, maintains independence from third-party services, and keeps the focus on the modeling pipeline (calibrated probabilities, leakage-safe baselines, SHAP explanations) rather than weather data plumbing.
 
@@ -259,7 +260,7 @@ The collaborative phase focused on:
 - Data cleaning
 - Feature engineering
 
-This repository represents an independent continuation of that work, expanding the dataset to focusing on:
+This repository represents an independent continuation of that work, with a stronger focus on:
 - Model development
 - Model training
 - Hyperparameter tuning
@@ -272,8 +273,8 @@ https://github.com/CrystalF042/applied-statistics
 
 ## References
 
-- Sternberg et al. (2021). A Review on Flight Delay Prediction. *arXiv:1703.06118*.
-- Rebollo & Balakrishnan (2014). Characterization and prediction of air traffic delays. *Transp. Res. Part C*, 44, 231–241.
-- Alfarhood, M., Alotaibi, R., Abdulrahim, B., Einieh, A., Almousa, M., & Alkhanifer, A. (2024). Predicting flight delays with machine learning: *A case study from Saudi Arabian Airlines. International Journal of Aerospace Engineering*, 2024, Article 3385463. https://doi.org/10.1155/2024/3385463
+- Sternberg, A., Soares, J., Carvalho, D., & Ogasawara, E. (2021). A Review on Flight Delay Prediction. *arXiv:1703.06118*.
+- Rebollo, J. J., & Balakrishnan, H. (2014). Characterization and prediction of air traffic delays. *Transportation Research Part C*, 44, 231–241.
+- Alfarhood, M., Alotaibi, R., Abdulrahim, B., Einieh, A., Almousa, M., & Alkhanifer, A. (2024). Predicting flight delays with machine learning: A case study from Saudi Arabian Airlines. *International Journal of Aerospace Engineering, 2024*, Article 3385463. https://doi.org/10.1155/2024/3385463
 - Hatıpoğlu, I., Tosun, Ö., & Tosun, N. (2022). Flight delay prediction based with machine learning. *LogForum*, 18, 97–107. https://doi.org/10.17270/J.LOG.2022.655
 - Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. In I. Guyon et al. (Eds.), *Advances in Neural Information Processing Systems 30* (pp. 4765–4774). Curran Associates, Inc.
