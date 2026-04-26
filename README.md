@@ -246,12 +246,25 @@ flight-delay-prediction/
 └── reports/figures/
 ```
 
-```bash
-git clone <repo-url> && cd flight-delay-prediction
-pip install -r requirements.txt
-jupyter notebook notebooks/flight_delay_modeling.ipynb
-cd app && shiny run app.py
-```
+## Project Origin
+
+This repository builds on an earlier collaborative project.
+
+The collaborative phase focused on:
+- Exploratory Data Analysis (EDA)
+- Data cleaning
+- Feature engineering
+
+This repository represents an independent continuation of that work, expanding the dataset to focusing on:
+- Model development
+- Model training
+- Hyperparameter tuning
+- Model evaluation
+- Shiny app development
+
+Some preprocessing ideas and code were adapted from the earlier project:
+https://github.com/CrystalF042/applied-statistics
+
 
 ## References
 
