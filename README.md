@@ -157,7 +157,7 @@ The CV-to-test gap (0.710 → 0.664) reflects seasonal distribution shift: train
 
 SHAP values computed on 10,000 test flights. Feature importance ranked by mean |SHAP value|:
 
-| Rank | Feature | Mean |SHAP| |
+| Rank | Feature | Mean \|SHAP\| |
 |---|---|---|
 | 1 | scheduled_dep_hour | 0.469 |
 | 2 | op_unique_carrier | 0.161 |
