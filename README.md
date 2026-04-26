@@ -146,7 +146,7 @@ LightGBM selected as final model â€” equivalent performance to CatBoost at ~2.5Ã
 | Recall | 0.480 |
 | F1 | 0.354 |
 
-<img width="700" alt="Image" src="https://github.com/user-attachments/assets/1f700c25-f36c-48b6-a27d-8ab20cedc2aa" />
+<img width="500" alt="Image" src="https://github.com/user-attachments/assets/1f700c25-f36c-48b6-a27d-8ab20cedc2aa" />
 
 *Figure 3: Confusion matrix at threshold 0.160. 94,528 true positives / 242,298 false positives / 102,204 false negatives / 695,155 true negatives.*
 
