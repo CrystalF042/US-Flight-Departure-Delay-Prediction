@@ -172,7 +172,7 @@ SHAP values computed on 10,000 test flights. Feature importance ranked by mean |
 
 *Figure 4: Global feature importance (mean |SHAP|). 6 of the top 15 features are weather variables.*
 
-<img width="500" alt="Image" src="https://github.com/user-attachments/assets/d3b38325-f333-41ce-a569-3fd49dfe227b" />
+<img width="500" alt="Image" src="https://github.com/user-attachments/assets/d3e0c843-3750-4ec9-9d3a-0fbe68f3b294" />
 
 *Figure 5: SHAP beeswarm plot. Red = high feature value, blue = low. Evening departure hours push strongly toward delay; high precipitation does the same.*
 
